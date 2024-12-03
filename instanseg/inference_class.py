@@ -317,6 +317,33 @@ class InstanSeg():
             output = output_list
         
         return output
+
+    def save_overlay_only(self,
+                    image_path: str, 
+                    labels: torch.Tensor,
+                    image_array: Optional[np.ndarray] = None) -> None:
+        """
+        Save the overlay of InstanSeg only to disk.
+        :param image_path: The path to the image, and where outputs will be saved.
+        :param labels: The output labels.
+        :param image_array: The image in array format. Required to save overlay.
+        """
+        if isinstance(image_path, str):
+            image_path = Path(image_path)
+        if isinstance(labels, torch.Tensor):
+            labels = labels.cpu().detach().numpy()
+
+        new_stem = image_path.stem + self.prediction_tag
+
+        from skimage import io
+
+        if self.verbose:
+            out_path = Path(image_path).parent / (new_stem + "_overlay.tiff")
+            print(f"Saving overlay to {out_path}")
+        assert image_array is not None, "Image array must be provided to save overlay."
+        display = self.display(image_array, labels)
+        
+        io.imsave(out_path, display, check_contrast=False)
     
     def save_output(self,
                     image_path: str, 
